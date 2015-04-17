@@ -28,7 +28,7 @@ def read_random_line(f, chunk_size=128):
         f_handle.seek(i, os.SEEK_SET)
         return f_handle.readline()
 
-def clean_str(c1,include_s):
+def clean_str(c1):
   c2 = c1.read().split('\n')
   utterlist = []
   for row in c2:
@@ -98,7 +98,7 @@ class CreateDataset:
   def generateResponses(self, num_responses, convo, testpct):
     fakes = []
     i = 0
-    while i < len(num_responses):
+    while i < num_responses:
     #for i in xrange(num_responses):
       if convo in self.traindic:
         num = randint(0,int(len(self.filelist)*(1-2*testpct))-1)
@@ -120,7 +120,7 @@ class CreateDataset:
         c2 = "".join(c[3:])
         c2 = c2.strip()
         """
-        c2 = utterlist[randint(0,len(c)-1)].strip()
+        c2 = utterlist[randint(0,len(utterlist)-1)].strip()
         if len(c2) > 1:
           fakes.append(c2)
           i += 1
