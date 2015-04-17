@@ -220,39 +220,40 @@ class CreateDataset:
             if len(namedict) > 2:
               self.writeFiles('../badfiles.csv', [[filein]] ,False)   
             """            
-            if utterlist[0] != utterlist[1]:
-              if convo in self.traindic:
-                for i in xrange(2,len(utterlist) - 1):
-                  context = utterlist[max(0,i - max_context_size):i]
-                  context = ' </s> '.join(context)  
-                  response = utterlist[i]
-                  fakes = self.generateResponses(num_options_train - 1, convo, testpct)  
-                  data = [[context, response, 1]]
-                  for fake in fakes:
-                    data.append([context, fake, 0])
-                  #self.writeFiles('../trainset.csv', data)  
-                  traindata.append(data)
-              else:
-              
-              #generate a context window size, following the approximate distribution of the training set
-                contextsize = int((max_context_size*10)/randint(max_context_size/2,max_context_size*10)) + 1 + 1 #last +1 for prediction sentence
-                if contextsize > len(utterlist):
-                  contextsize = len(utterlist)
-                for i in xrange(0,int((len(utterlist))/contextsize)):
-                  j = i*contextsize
-                  context = utterlist[j:j + contextsize - 1]
-                  context = ' </s> '.join(context)  
-                  response = utterlist[j + contextsize - 1]
-                  fakes = self.generateResponses(num_options_test - 1, convo, testpct)  
-                  data = [[context, response, 1]]  
-                  for fake in fakes:                  
-                    data.append([context, fake, 0])              
-                  if convo in self.valdic: 
-                    #self.writeFiles('../valset.csv', data)
-                    valdata.append(data)
-                  else: 
-                    #self.writeFiles('../testset.csv', data)
-                    testdata.append(data)
+            if len(utterlist)>=3:
+              if utterlist[0] != utterlist[1]:
+                if convo in self.traindic:
+                  for i in xrange(2,len(utterlist) - 1):
+                    context = utterlist[max(0,i - max_context_size):i]
+                    context = ' </s> '.join(context)  
+                    response = utterlist[i]
+                    fakes = self.generateResponses(num_options_train - 1, convo, testpct)  
+                    data = [[context, response, 1]]
+                    for fake in fakes:
+                      data.append([context, fake, 0])
+                    #self.writeFiles('../trainset.csv', data)  
+                    traindata.append(data)
+                else:
+                
+                #generate a context window size, following the approximate distribution of the training set
+                  contextsize = int((max_context_size*10)/randint(max_context_size/2,max_context_size*10)) + 1 + 1 #last +1 for prediction sentence
+                  if contextsize > len(utterlist):
+                    contextsize = len(utterlist)
+                  for i in xrange(0,int((len(utterlist))/contextsize)):
+                    j = i*contextsize
+                    context = utterlist[j:j + contextsize - 1]
+                    context = ' </s> '.join(context)  
+                    response = utterlist[j + contextsize - 1]
+                    fakes = self.generateResponses(num_options_test - 1, convo, testpct)  
+                    data = [[context, response, 1]]  
+                    for fake in fakes:                  
+                      data.append([context, fake, 0])              
+                    if convo in self.valdic: 
+                      #self.writeFiles('../valset.csv', data)
+                      valdata.append(data)
+                    else: 
+                      #self.writeFiles('../testset.csv', data)
+                      testdata.append(data)
             if k % filesperprint == 0 or k == len(files):
               #print 'Finished data files, writing data'
               if traindata != []:
