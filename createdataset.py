@@ -33,7 +33,7 @@ def clean_str(c1,include_s):
   utterlist = []
   for row in c2:
     row = row.split('\t')
-    if row[0] == 'ubotu' or row[0] == 'ubottu' or row[0] = 'ubot3':
+    if row[0] == 'ubotu' or row[0] == 'ubottu' or row[0] == 'ubot3':
       return [0,0]
     if len("".join(row[3:])) != 0:
       utterlist.append("".join(row[3:]))
