@@ -21,7 +21,6 @@ def createWordDict(filein):
 	dict1 = {}
 	with open(filein, 'r') as c1:
 		c1 = c1.read().split('\n')
-		print len(c1)
 		for i in range(len(c1)):
 			word = c1[i].split('\t')
 			#print word
