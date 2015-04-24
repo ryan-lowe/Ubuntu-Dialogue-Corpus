@@ -378,10 +378,10 @@ class CreateDataset:
                       context = utterlist[max(0,i - max_context_size):i]
                       context = joinstring.join(context)  
                       response = utterlist[i]
-                      #fakes = self.generateResponses(num_options_train - 1, convo, testpct)  
+                      fakes = self.generateResponses(num_options_train - 1, convo, testpct)  
                       data = [[context, response, 1]]
-                      #for fake in fakes:
-                       # data.append([context, fake, 0])
+                      for fake in fakes:
+                        data.append([context, fake, 0])
                       traindata.append(data)
                   else:
                   
