@@ -155,29 +155,73 @@ class NormalizeData:
               utterlist[i] = " ".join(utterlist[i])
 """            
 
+import os
+import re
+def preprocess_str(string, TREC=False):
+    """
+    Tokenization/string cleaning for all datasets except for SST.
+    Every dataset is lower cased except for TREC
+    """
+    #string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)
+    #string = re.sub(r"\'m", " \'m", string) 
+    #string = re.sub(r"\'s", " \'s", string) 
+    #string = re.sub(r"\'ve", " \'ve", string) 
+    #string = re.sub(r"n\'t", " n\'t", string) 
+    #string = re.sub(r"\'re", " \'re", string) 
+    #string = re.sub(r"\'d", " \'d", string) 
+    #string = re.sub(r"\'ll", " \'ll", string) 
+    string = re.sub(r"`", " ` ", string)
+    string = re.sub(r",", " , ", string) 
+    #string = re.sub(r"!", " ! ", string) 
+    #string = re.sub(r"\(", " \( ", string) 
+    #string = re.sub(r"\)", " \) ", string) 
+    #string = re.sub(r"\?", " \? ", string) 
+    #string = re.sub(r"\s{2,}", " ", string)    
+    return string.strip()# if TREC else string.strip().lower()
+
+os.environ['CLASSPATH']='.:../dialog/libs/commons-lang3-3.4.jar:../dialog/libs'
+from jnius import autoclass
+Twokenizer = autoclass('cmu.arktweetnlp.Twokenize')
+def tokenize(s, tokenizer=Twokenizer()):
+    s = preprocess_str(s)
+    tokens = tokenizer.tokenizeRawTweetText(s.decode('utf-8'))
+    return [tokens.get(i) for i in xrange(tokens.size())]
+
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
+
+val = URLValidator(verify_exists=False)
+def is_url(s):
+    try:
+        val(s)
+        return True
+    except ValidationError:
+        return False
+    except ImportError:
+        return False
 
 def replace_sentence(text):
-    words = nltk.word_tokenize(text)
+    words = tokenize(text)
     sent = nltk.pos_tag(words)
     chunks = nltk.ne_chunk(sent, binary=False)
     sentence = []
     nodelist = ['PERSON','ORGANIZATION','GPE','LOCATION','FACILITY','GSP']
-    for c,word in zip(chunks,words):
+    for c,word in map(None, chunks, words):
         changed = False
         if hasattr(c, 'node'):     
             if c.node in nodelist:
-                sentence.append("**%s**" % c.node) 
+                sentence.append("__%s__" % c.node)
                 changed = True
         if not changed:
-          if word.startswith('http://') or word.startswith('https://'):
-              sentence.append("**URL**")
+          if is_url(word):
+              sentence.append("__URL__")
           elif is_number(word):
-              sentence.append("**NUMBER**")
+              sentence.append("__NUMBER__")
           elif os.path.isabs(word):
-              sentence.append("**PATH**")
+              sentence.append("__PATH__")
           else:
             sentence.append(word)           
-    return " ".join(sentence)            
+    return " ".join(sentence) 
 
 """
 path1 = './dialogs/20/10800.tsv'
@@ -256,7 +300,7 @@ class CreateDataset:
         if len(c2) > 1:
           fakes.append(c2)
           i += 1
-    return fakes
+    return [replace_sentence(s) for s in fakes]
 
   def createDicts(self, testpct, trainfiles = None, valfiles = None, testfiles = None):
     print 'Creating dictionary of training, validation, and test sets'
@@ -436,7 +480,7 @@ class CreateDataset:
 
 global joinstring 
 global joinsentence
-joinstring = ' </s> '
+joinstring = ' __EOS__ '
 joinsentence = '. '
 data1 = CreateDataset('./dialogs/')
 data1.sortFiles()
