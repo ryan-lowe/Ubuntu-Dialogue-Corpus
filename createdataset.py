@@ -249,7 +249,10 @@ class CreateDataset:
         #c = c[randint(0,len(c)-1)].split('\t')
         #c2 = "".join(c[3:])
         #c2 = c2.strip()
-        c2 = utterlist[randint(0,len(utterlist)-1)].strip()
+        c2 = utterlist[randint(0,len(utterlist)-1)]
+        if isinstance(c2,basestring) == False:
+          break
+        c2 = c2.split()
         if len(c2) > 1:
           fakes.append(c2)
           i += 1
